@@ -83,7 +83,10 @@ LA_sample<-LA[,c("Host_Response_Rate","Host_Is_Superhost","Host_total_listings_c
 summary(LA_sample) 
 #totally 39 variables
 
-#Set training and testing dataset
+#deal with too many 0 in rating
+hist(LA_sample$Review_Scores_Rating)
+LA_sample<-LA_sample[LA_sample$Number_of_reviews!=0&LA_sample$Review_Scores_Rating!=0,]
+
 
 #Set training and testing dataset
 
@@ -104,7 +107,7 @@ correlation<-data.frame(cor(training_t))
 
 #delete review "Review_Scores_Value","Review_Scores_Accuracy","Review_Scores_Cleanliness","Review_Scores_Checkin","Review_Scores_Communication","Review_Scores_Location" and entire_house
 training<-training[,-which(names(training) %in% c("Review_Scores_Value","Review_Scores_Accuracy","Review_Scores_Cleanliness","Review_Scores_Checkin","Review_Scores_Communication","Review_Scores_Location","entirehouse"))]
-test<-test[,-which(names(test) %in% c("Review_Scores_Accuracy","Review_Scores_Cleanliness","Review_Scores_Checkin","Review_Scores_Communication","Review_Scores_Location","entirehouse"))]
+test<-test[,-which(names(test) %in% c("Review_Scores_Value","Review_Scores_Accuracy","Review_Scores_Cleanliness","Review_Scores_Checkin","Review_Scores_Communication","Review_Scores_Location","entirehouse"))]
 training<-training %>% clean_names()
 test<-test %>% clean_names()
 colnames(training)
@@ -116,13 +119,17 @@ x_t<-as.matrix(x)
 res = lars(x_t, y, type="stepwise")
 print(summary(res))
 res
-#cp=28.646 28 variables included, which are recent_review, reviews_per_month, x24_hour_check_in, 
-#host_is_superhost, is_apartment, is_house, host_response_rate, availability_365, minimum_nights,
-#price, indoor_fireplace, condo, accommodates, host_total_listings_count, venice_neighbourhood,
-#townhouse, loft, guesthouse, sharedroom, bathrooms, lock_on_bedroom_door, privateroom, 
-#santa_monica_neighbourhood, bedrooms, elevator_in_building, long_beach_neighbourhood, maximum_nights,
-#number_of_reviews
-#add review_scores_rating also. total 29 variables
+
+#cp=24.038 24 variables included, which are host_is_superhost, sharedroom, availability_365, is_apartment,
+#host_total_listings_count, price accommodates, host_response_rate,maximum_nights, indoor_fireplace,
+#lock_on_bedroom_door, recent_review, number_of_reviews, minimum_nights, long_beach_neighbourhood, pool,
+#hollywood_neighbourhood, loft, guesthouse, reviews_per_month, bathrooms, condo, santa_monica_neighbourhood, bedrooms
+
+
+#add review_scores_rating also. total 25 variables
 
 colnames(training)
-training<-training[,c(12,27,13,28,2,14,15,1,10,8,7,29,16,4,3,21,17,18,19,26,5,30,25,24,6,32,22,9,11)]
+training<-training[,c("review_scores_rating","host_is_superhost","sharedroom", "availability_365", "is_apartment",
+                      "host_total_listings_count", "price", "accommodates", "host_response_rate","maximum_nights", "indoor_fireplace",
+                      "lock_on_bedroom_door", "recent_review", "number_of_reviews", "minimum_nights", "long_beach_neighbourhood", "pool",
+                      "hollywood_neighbourhood", "loft", "guesthouse", "reviews_per_month", "bathrooms", "condo", "santa_monica_neighbourhood","bedrooms")]
